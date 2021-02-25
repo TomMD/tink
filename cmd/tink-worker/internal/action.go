@@ -21,15 +21,26 @@ const (
 	infoWaitFinished = "wait finished for failed or timeout container"
 )
 
-func (w *Worker) createContainer(ctx context.Context, cmd []string, wfID string, action *pb.WorkflowAction) (string, error) {
+func (w *Worker) createContainer(ctx context.Context, cmd []string, wfID string, action *pb.WorkflowAction, captureLogs bool) (string, error) {
 	registry := w.registry
-	config := &container.Config{
-		Image:        path.Join(registry, action.GetImage()),
-		AttachStdout: true,
-		AttachStderr: true,
-		Cmd:          cmd,
-		Tty:          true,
-		Env:          action.GetEnvironment(),
+	if captureLogs {
+		config := &container.Config{
+			Image:        path.Join(registry, action.GetImage()),
+			AttachStdout: true,
+			AttachStderr: true,
+			Cmd:          cmd,
+			Tty:          true,
+			Env:          action.GetEnvironment(),
+		}
+	} else {
+		config := &container.Config{
+			Image:        path.Join(registry, action.GetImage()),
+			AttachStdout: false,
+			AttachStderr: false,
+			Cmd:          cmd,
+			Tty:          false,
+			Env:          action.GetEnvironment(),
+		}
 	}
 
 	wfDir := filepath.Join(dataDir, wfID)

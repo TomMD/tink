@@ -23,24 +23,18 @@ const (
 
 func (w *Worker) createContainer(ctx context.Context, cmd []string, wfID string, action *pb.WorkflowAction, captureLogs bool) (string, error) {
 	registry := w.registry
-	if captureLogs {
-		config := &container.Config{
-			Image:        path.Join(registry, action.GetImage()),
-			AttachStdout: true,
-			AttachStderr: true,
-			Cmd:          cmd,
-			Tty:          true,
-			Env:          action.GetEnvironment(),
-		}
-	} else {
-		config := &container.Config{
-			Image:        path.Join(registry, action.GetImage()),
-			AttachStdout: false,
-			AttachStderr: false,
-			Cmd:          cmd,
-			Tty:          false,
-			Env:          action.GetEnvironment(),
-		}
+	config := &container.Config{
+		Image:        path.Join(registry, action.GetImage()),
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          cmd,
+		Tty:          true,
+		Env:          action.GetEnvironment(),
+	}
+	if !captureLogs {
+		config.AttachStdout = true
+		config.AttachStderr = true
+		config.Tty = false
 	}
 
 	wfDir := filepath.Join(dataDir, wfID)

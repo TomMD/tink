@@ -143,7 +143,7 @@ func (w *Worker) execute(ctx context.Context, wfID string, action *pb.WorkflowAc
 	l.With("status", status.String()).Info("container removed")
 	if status != pb.State_STATE_SUCCESS {
 		if status == pb.State_STATE_TIMEOUT && action.OnTimeout != nil {
-			id, err = w.createContainer(ctx, action.OnTimeout, wfID, action)
+			id, err = w.createContainer(ctx, action.OnTimeout, wfID, action, captureLogs)
 			if err != nil {
 				l.Error(errors.Wrap(err, errCreateContainer))
 			}
@@ -160,7 +160,7 @@ func (w *Worker) execute(ctx context.Context, wfID string, action *pb.WorkflowAc
 			l.With("status", onTimeoutStatus).Info("action timeout")
 		} else {
 			if action.OnFailure != nil {
-				id, err = w.createContainer(ctx, action.OnFailure, wfID, action)
+				id, err = w.createContainer(ctx, action.OnFailure, wfID, action, captureLogs)
 				if err != nil {
 					l.Error(errors.Wrap(err, errFailedToRunCmd))
 				}
